@@ -1,0 +1,373 @@
+\documentclass[12pt]{article}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsfonts}
+\usepackage[polish]{babel}
+\usepackage[T1]{fontenc}
+\usepackage[dvips]{graphicx}
+\usepackage[cp1250]{inputenc}
+\usepackage{listings}
+
+\textheight 23.2 cm
+
+\textwidth 6.0 in
+
+\hoffset = -0.5 in
+
+\voffset = -2.4 cm
+
+\hyphenation{}
+
+\frenchspacing
+
+\begin{document}
+
+%\thispagestyle{empty}
+
+\vspace*{3ex}
+\begin{flushright}
+{\large 16 April 2019}
+\end{flushright}
+
+\begin{flushleft}
+{\large Maciej Zalewski\\
+Group 2}
+\end{flushleft}
+
+\hskip3cm
+
+\begin{center}
+
+\Large {\bf Decomposition of a tridiagonal matrix \\ using Cholesky factorization \\ in solving system of equations $A^{T}Ax = b$.}
+
+\vskip2ex
+
+{\large Project 5}
+
+\end{center}
+
+\pagebreak
+
+\begin{center}
+\section{Method description}
+\end{center}
+
+\noindent In linear algebra and numerical analysis the Cholesky factorization is being used to decompose a symmetric positive definite matrix into a product of a lower triangular matrix and its transposition.
+
+\begin{equation}
+A = LL^{T} \label{cholesky}
+\end{equation}
+
+Cholesky decomposition efficiency in solving systems of linear equations is nearly twice as much as the normal LU decomposition.
+
+For factorization of tridiagonal matrices it is possible to use slightly modificated algorithm which uses special properties of such matrices.
+
+\begin{equation}
+A=\begin{pmatrix}
+a_{1,1} & a_{2,1} & 0 & \ldots & 0 \\
+a_{2,1} & a_{2,2} & a_{3,2} & \ldots & 0 \\
+0 & a_{3,2} & a_{3,3} & \ldots & 0 \\
+\vdots & \vdots & \vdots & \ddots & \vdots \\
+0 & 0 & 0 & \ldots & a_{n,n}
+\end{pmatrix}
+\end{equation}
+
+\begin{equation}
+L=\begin{pmatrix}
+l_{1,1} & 0 & 0 & \ldots & 0 \\
+l_{2,1} & l_{2,2} & 0 & \ldots & 0 \\
+0 & l_{3,2} & l_{3,3} & \ldots & 0 \\
+\vdots & \vdots & \vdots & \ddots & \vdots \\
+0 & 0 & 0 & \ldots & l_{n,n}
+\end{pmatrix}
+\end{equation}
+
+For $n\times n$ matrix A we form matrices L (lower triangular) and $L^{T}$ for an equation (\ref{cholesky}). Multiplying matrices on the right side and comparing outcome with A we recive formulas for the matrix L.
+
+\begin{equation*}
+l_{1,1} = \sqrt{a_{1,1}}
+\end{equation*}
+
+\[
+\forall k \in \{2,...,n\}
+\]
+
+\begin{equation*}
+l_{k,k} = \sqrt{a_{k,k} - l_{k,k-1}^{2}} \label{maindiag}
+\end{equation*}
+
+\medskip Formula for main diagonal in matrix L. $a_{i,j}$ stands for corresponding elements in A.
+
+\begin{equation*}
+l_{k,k-1} = \frac{a_{k,k-1}}{l_{k-1,k-1}} \label{diag}
+\end{equation*}
+
+\medskip Matrix A is tridiagonal, so matrix L have only 2 non-zero diagonals (\ref{diag}). This fact is being used in the algorithm to skip 0 elements, thus increase efficiency.
+
+Using the matrix L created in such way we can solve  $A^{T}Ax = b$ by substitution (\ref{cholesky}).
+
+\begin{equation*}
+LL^{T}LL^{T}x = b
+\end{equation*}
+
+Now it is possible to simplify calculations by next substitutions. Created equations are solved in given order:
+\medskip
+\begin{enumerate}
+	\item{$LQ = b$}
+	\item{$L^{T}Z = Q$}
+	\item{$LY = Z$}
+	\item{$L^{T}x = Y$} 
+\end{enumerate}
+
+\pagebreak
+
+
+\begin{center}
+\section{Program description}
+\end{center}
+
+\noindent After you ran the program, you will the menu:
+
+\vskip3ex
+\begin{center}
+\hspace*{-2ex}
+\begin{tabular}{|c|} \hline
+\\
+{\bf Cholesky tridiagonal factorization}
+\\\\  Input tridiagonal matrix A \\\\ Input vector b \\\\
+Display A and b \\\\ Compute factorization of A \\\\
+Compute $A^{T}Ax=b$ \\\\  Calculate Errors \\\\
+FINISH\\\\
+
+\hline
+\end{tabular}
+\end{center}
+
+\vskip3ex
+\medskip 
+\vskip3ex
+
+\begin{itemize}
+	\item Pressing 'Input tridiagonal matrix A' allows to input new matrix A by giving vector of size n for main diagonal and vector of size n-1 for other diagonals. New matrix is checked whether it is positive definite. Otherwise predefined matrix is used.
+	\item 'Input vector b' allows to input new vecotr b which should be of size n (A $n\times n$). If not, vector b is predefined.
+	\item 'Display A and b' shows current matrix A and vector b.
+	\item Button 'Compute factorization of A' uses Cholesky decomposition on the matrix A, shows the result and stores it in matrix L.
+	\item Option 'Compute $A^{T}Ax=b$' solves the given system of linear equations for the current matrix A and vector b using Cholesky decomposition.
+	\item 'Calculate Errors' computes the condition number for A, the decomposition error and the relative error.
+	\item Last option 'EXIT' closes the program.
+\end{itemize}
+
+\vskip 5pt
+
+\noindent Functions used:
+\begin{enumerate}
+	\item MenuCholeskyTrid.m - script for GUI, implements other functions.
+	\item CholeskyTrid.m - function calculating matrix L for tridiagonal matrix A using Cholesky decomposition.
+	\item CholeskyTrid1.m - function uses CholeskyTrid.m to calculate L, then solves  $A^{T}Ax=b$ with Lower\_triangular.m and Upper\_triangular.m .
+	\item Lower\_triangular.m - function used to compute solution for $Ax=b$ where A is lower triangular matrix.
+	\item Upper\_triangular.m - function used to compute solution for $Ax=b$ where A is upper triangular matrix.
+	\item tridiag1.m - function used to create tridiagonal $n\times n$ matrix from two vectors.
+	\item calculate\_errors.m - for current A, b and L calculates the condition number of A, the decomposition error and the relative error.
+	
+	\noindent ({\bf Note.} \emph{All source codes can be found in section 5.})
+\end{enumerate}
+
+\begin{center}
+\section{Numerical examples}
+\end{center}
+
+\noindent Numerical tests are done for the predefined data in the program and some other cases to check how the algorithm behaves. Solution to the system of linear equations and decomposition of A is done with functions CholeskyTrid1 and CholeskyTrid. Then condition number for A and errors are computed with calculate\_errors. Data for different exaples is set manually in the menu.
+
+\bigskip
+
+\begin{itemize}
+	\item Decomposition error
+	\[
+	error\_dec = \frac{norm(A - L \cdot L^{T})}{norm(A)}
+	\]
+	\item Relative error
+	
+	\[
+	error\_rel = \frac{ norm(x - z)}{norm(x)}
+	\]
+	
+	\quad Where z is the solution calculated with MATLAB builtin functions.
+\end{itemize}
+
+\bigskip
+
+\textbf{Tests:}
+$x$ is the result obtained from using implemented Cholesky function on the given matrix A and vector b.
+
+\begin{enumerate}
+	\item Predefined data: $A = hess(hilb(6))$ and $b = [1,2,3,4,5,6]$
+	
+	\[
+	A=\begin{pmatrix}
+	0.0000 & -0.0000 & 0 & 0 & 0 & 0 \\
+	-0.0000 & 0.0003 & 0.0006 & 0 & 0 & 0 \\
+	0 & 0.0006 & 0.0138 & 0.0224 & 0 & 0 \\
+	0 & 0 & 0.0224 & 0.3198 & -0.3764 & 0 \\
+	0 & 0 & 0 & -0.3764 & 1.4534 & -0.2935 \\
+	0 & 0 & 0 & 0 & -0.2935 & 0.0909 \\
+	\end{pmatrix}\textbf{, }
+	b=\begin{pmatrix}
+	1 \\
+	2 \\
+	3 \\
+	4 \\
+	5 \\
+	6 
+	\end{pmatrix}
+	\]
+	
+	Result:
+	\[
+	x =\begin{pmatrix}
+	2.5487 \cdot 10^{14} \\
+	1.0908 \cdot 10^{14} \\
+	-0.5945 \cdot 10^{14} \\
+	0.3367 \cdot 10^{14} \\
+	0.2506 \cdot 10^{14} \\
+	0.8090 \cdot 10^{14}
+	\end{pmatrix}
+	\]
+	\begin{table}[h!]
+		\caption{\footnotesize 1st example $cond(A)$ and errors} \vskip1ex
+		\renewcommand{\arraystretch}{1.1}
+		\centering\begin{tabular}{|c|c|c|}
+			\hline $cond(A)$ & Decomposition & Relative \\ 
+			& error & error\\
+			\hline $1.4951 \cdot 10^{7}$ & $1.0715 \cdot 10^{-18}$ & $1.3830 \cdot 10^{-5}$ \\
+			\hline
+		\end{tabular}
+	\end{table}
+
+	\item A and b from input
+	
+	\[
+	A=\begin{pmatrix}
+	3 & 1 & 0 & 0 & 0 \\
+	1 & 3 & 1 & 0 & 0 \\
+	0 & 1 & 3 & 1 & 0 \\
+	0 & 0 & 1 & 3 & 1 \\
+	0 & 0 & 0 & 1 & 3 \\
+	\end{pmatrix}\textbf{, }
+	b=\begin{pmatrix}
+	1 \\
+	1 \\
+	1 \\
+	1 \\
+	1 
+	\end{pmatrix}
+	\]
+	
+	Result:
+	\[
+	x =\begin{pmatrix}
+	0.0926 \\
+	-0.0000 \\
+	0.0741 \\
+	-0.0000 \\
+	0.0926
+	\end{pmatrix}
+	\]
+	\begin{table}[h!]
+		\caption{\footnotesize 2nd example $cond(A)$ and errors} \vskip1ex
+		\renewcommand{\arraystretch}{1.1}
+		\centering\begin{tabular}{|c|c|c|}
+			\hline $cond(A)$ & Decomposition & Relative \\ 
+			& error & error\\
+			\hline $3.7321$ & $9.3847 \cdot 10^{-17}$ & $3.6610 \cdot 10^{-16}$ \\
+			\hline
+		\end{tabular}
+	\end{table}
+
+	\item A and b from input
+	
+	\[
+	A=\begin{pmatrix}
+	4 & 1 & 0 & 0 & 0 & 0 \\
+	-1 & 5 & -2 & 0 & 0 & 0 \\
+	0 & -2 & 6 & -3 & 0 & 0 \\
+	0 & 0 & -3 & 7 & -3 & 0 \\
+	0 & 0 & 0 & -3 & 8 & -2 \\
+	0 & 0 & 0 & 0 & -2 & 9 
+	\end{pmatrix}\textbf{, }
+	b=\begin{pmatrix}
+	6 \\
+	5 \\
+	4 \\
+	3 \\
+	2 \\
+	1 
+	\end{pmatrix}
+	\]
+	
+	Result:
+	\[
+	x =\begin{pmatrix}
+	0.8197 \\
+	1.1818 \\
+	1.3503 \\
+	1.1053 \\
+	0.5888 \\
+	0.1693
+	\end{pmatrix}
+	\]
+	\begin{table}[h!]
+		\caption{\footnotesize 3rd example $cond(A)$ and errors} \vskip1ex
+		\renewcommand{\arraystretch}{1.1}
+		\centering\begin{tabular}{|c|c|c|}
+			\hline $cond(A)$ & Decomposition & Relative \\ 
+			& error & error\\
+			\hline $6.3402$ & $7.3944 \cdot 10^{-17}$ & $6.1616 \cdot 10^{-16}$ \\
+			\hline
+		\end{tabular}
+	\end{table}
+	
+\end{enumerate}
+\section{Analysis of the results}
+
+In conclusion, solving equations $A^{T}Ax=b$, where  $A \in \mathbb R^{n \times n}$ is tridiagonal and symmetric positive definite with the Cholesky factorization method $(A=LL^{T})$ is accurate. When special properties of such tridiagonal matrices are taken into account, this method is even more efficient than the classical one.
+ 
+\medskip As expected the method does not produce big errors when $cond(A)$ is small. The biggest relative error $error\_rel = 1.3830 \cdot 10^{-5}$ occured for default program data $A = hess(hilb(6))$ where $cond(A) = 1.4951 \cdot 10^{7}$, which is significantly more then $cond(A)$ in other examples ($10^{-16}$).
+
+\medskip Decomposition errors in every case are negligibly small ($10^{-17}$).
+
+\medskip In summary, this method is an accurate and quick way of solving  $A^{T}Ax=b$ for specific matrices A, because it uses special properties of tridiagonal symmetric matrices. One must have in mind to apply it for A with small condition number to lower the relative error.	
+
+\pagebreak
+
+\begin{center}
+	\item \section{Source Codes}
+\end{center}
+
+{\bf MenuCholeskyTrid.m:}
+\lstinputlisting {MenuCholeskyTrid.m}
+
+\medskip 
+{\bf CholeskyTrid.m:}
+\lstinputlisting{CholeskyTrid.m}
+
+\medskip 
+{\bf CholeskyTrid1.m:}
+\lstinputlisting{CholeskyTrid1.m}
+
+\medskip 
+{\bf Lower\_triangular.m:}
+\lstinputlisting{Lower_triangular.m}
+
+\medskip 
+{\bf Upper\_triangular.m:}
+\lstinputlisting{Upper_triangular.m}
+
+\medskip 
+{\bf tridiag1.m:}
+\lstinputlisting{tridiag1.m}
+
+\medskip 
+{\bf calculate\_errors.m:}
+\lstinputlisting{calculate_errors.m}
+
+\end{document}
